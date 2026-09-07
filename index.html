@@ -1,1 +1,2377 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>BIG BROTHER — Products Editor V1.0</title>
 
+  <style>
+    *{box-sizing:border-box}
+
+    :root{
+      --nav:#123f70;
+      --nav2:#0d3158;
+      --blue:#1769cf;
+      --blue2:#0d56ae;
+      --bg:#eef3f8;
+      --card:#fff;
+      --line:#d8e2ee;
+      --text:#163354;
+      --muted:#6d7f92;
+      --green:#168652;
+      --greenbg:#e8f7ef;
+      --red:#c73f4a;
+      --redbg:#fff0f1;
+      --amber:#9c6700;
+      --amberbg:#fff6dc;
+      --purple:#6d4acb;
+      --purplebg:#f2edff
+    }
+
+    html,body{min-height:100%}
+
+    body{
+      margin:0;
+      font-family:Arial,Helvetica,sans-serif;
+      background:var(--bg);
+      color:var(--text)
+    }
+
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    .hidden{display:none!important}
+
+    .app{
+      display:grid;
+      grid-template-columns:235px minmax(0,1fr);
+      min-height:100vh
+    }
+
+    .sidebar{
+      background:linear-gradient(180deg,var(--nav),var(--nav2));
+      color:#fff;
+      padding:20px 15px;
+      position:sticky;
+      top:0;
+      height:100vh
+    }
+
+    .brand{
+      font-size:22px;
+      font-weight:900;
+      letter-spacing:1.4px;
+      line-height:1.15
+    }
+
+    .brand-sub{
+      font-size:11px;
+      opacity:.82;
+      margin:5px 0 25px
+    }
+
+    .nav-title{
+      font-size:10px;
+      font-weight:800;
+      opacity:.6;
+      margin:18px 8px 7px
+    }
+
+    .nav-item{
+      width:100%;
+      border:0;
+      background:transparent;
+      color:#fff;
+      padding:11px 12px;
+      border-radius:9px;
+      margin:4px 0;
+      font-size:13px;
+      font-weight:700;
+      display:flex;
+      gap:9px;
+      align-items:center;
+      text-align:left
+    }
+
+    .nav-item.active,
+    .nav-item:hover{
+      background:rgba(255,255,255,.14);
+      box-shadow:inset 3px 0 0 #63abff
+    }
+
+    .side-note{
+      position:absolute;
+      left:15px;
+      right:15px;
+      bottom:18px;
+      border-top:1px solid rgba(255,255,255,.14);
+      padding-top:12px;
+      text-align:center;
+      font-size:10px;
+      line-height:1.5;
+      opacity:.75
+    }
+
+    .main{min-width:0}
+
+    .topbar{
+      min-height:70px;
+      background:#fff;
+      border-bottom:1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:10px 22px;
+      gap:16px
+    }
+
+    .title h1{
+      margin:0;
+      font-size:24px
+    }
+
+    .title p{
+      margin:4px 0 0;
+      font-size:12px;
+      color:var(--muted)
+    }
+
+    .connection{
+      padding:8px 11px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:900;
+      background:var(--amberbg);
+      color:var(--amber)
+    }
+
+    .connection.ok{
+      background:var(--greenbg);
+      color:var(--green)
+    }
+
+    .connection.bad{
+      background:var(--redbg);
+      color:var(--red)
+    }
+
+    .workspace{padding:16px 18px 35px}
+    .page{display:none}
+    .page.active{display:block}
+
+    .summary{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:10px;
+      margin-bottom:12px
+    }
+
+    .summary-card{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:11px;
+      padding:12px;
+      box-shadow:0 6px 18px rgba(18,63,112,.04)
+    }
+
+    .summary-card span{
+      font-size:10px;
+      color:var(--muted);
+      font-weight:800
+    }
+
+    .summary-card strong{
+      display:block;
+      margin-top:5px;
+      font-size:19px
+    }
+
+    .card{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:12px;
+      box-shadow:0 8px 22px rgba(18,63,112,.05);
+      overflow:hidden
+    }
+
+    .card+.card{margin-top:12px}
+
+    .card-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:13px 15px;
+      border-bottom:1px solid #e8eef4
+    }
+
+    .card-title{
+      font-size:15px;
+      font-weight:900
+    }
+
+    .card-sub{
+      font-size:10px;
+      color:var(--muted);
+      margin-top:3px
+    }
+
+    .card-body{padding:15px}
+
+    .form-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:11px
+    }
+
+    .form-grid.four{
+      grid-template-columns:repeat(4,minmax(0,1fr))
+    }
+
+    .field.full{grid-column:1/-1}
+
+    .field label{
+      display:block;
+      font-size:10px;
+      font-weight:900;
+      color:#48627d;
+      margin:0 0 5px
+    }
+
+    .field small{
+      display:block;
+      font-size:9px;
+      color:var(--muted);
+      margin-top:4px;
+      line-height:1.4
+    }
+
+    .field input,
+    .field select,
+    .field textarea,
+    .search{
+      width:100%;
+      border:1px solid #ccd8e5;
+      border-radius:8px;
+      background:#fff;
+      padding:9px 10px;
+      color:var(--text);
+      outline:none
+    }
+
+    .field textarea{
+      min-height:72px;
+      resize:vertical
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus,
+    .search:focus{
+      border-color:#5d9ee8;
+      box-shadow:0 0 0 3px rgba(23,105,207,.08)
+    }
+
+    .field input:disabled{
+      background:#f1f4f7;
+      color:#75879a
+    }
+
+    .btn{
+      border:0;
+      border-radius:8px;
+      padding:9px 12px;
+      font-weight:900
+    }
+
+    .btn.primary{
+      background:linear-gradient(135deg,var(--blue),var(--blue2));
+      color:#fff
+    }
+
+    .btn.green{
+      background:linear-gradient(135deg,#1a995f,#117445);
+      color:#fff
+    }
+
+    .btn.ghost{
+      background:#f4f8fb;
+      color:#345879;
+      border:1px solid var(--line)
+    }
+
+    .btn:disabled{
+      opacity:.55;
+      cursor:not-allowed
+    }
+
+    .actions{
+      display:flex;
+      justify-content:flex-end;
+      gap:8px;
+      margin-top:14px
+    }
+
+    .info{
+      padding:10px 11px;
+      border-radius:9px;
+      font-size:10px;
+      line-height:1.45
+    }
+
+    .info.blue{
+      background:#eef7ff;
+      border:1px solid #cce3fb;
+      color:#315f8f
+    }
+
+    .info.amber{
+      background:var(--amberbg);
+      border:1px solid #ecd48b;
+      color:#725311
+    }
+
+    .toolbar{
+      display:grid;
+      grid-template-columns:minmax(220px,1fr) 190px 170px auto;
+      gap:8px;
+      padding:13px 15px;
+      border-bottom:1px solid var(--line)
+    }
+
+    .table-wrap{overflow:auto}
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:11px;
+      min-width:850px
+    }
+
+    th{
+      background:#f1f5f9;
+      color:#405a76;
+      text-align:left;
+      padding:9px;
+      border-bottom:1px solid var(--line);
+      white-space:nowrap
+    }
+
+    td{
+      padding:9px;
+      border-bottom:1px solid #edf1f5;
+      vertical-align:middle
+    }
+
+    tr:hover td{background:#fafcfe}
+
+    .empty{
+      padding:28px!important;
+      text-align:center;
+      color:var(--muted)
+    }
+
+    .badge{
+      display:inline-block;
+      padding:4px 8px;
+      border-radius:999px;
+      font-size:9px;
+      font-weight:900
+    }
+
+    .badge.green{
+      background:var(--greenbg);
+      color:var(--green)
+    }
+
+    .badge.red{
+      background:var(--redbg);
+      color:var(--red)
+    }
+
+    .badge.blue{
+      background:#eaf3ff;
+      color:var(--blue)
+    }
+
+    .badge.purple{
+      background:var(--purplebg);
+      color:var(--purple)
+    }
+
+    .badge.amber{
+      background:var(--amberbg);
+      color:var(--amber)
+    }
+
+    .row-btn{
+      padding:6px 9px;
+      border-radius:7px;
+      border:1px solid #cbd9e7;
+      background:#fff;
+      color:var(--blue);
+      font-weight:900
+    }
+
+    .section{
+      padding:15px;
+      border-bottom:1px solid #e8eef4
+    }
+
+    .section:last-child{border-bottom:0}
+
+    .section-title{
+      font-size:13px;
+      font-weight:900;
+      margin:0 0 11px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px
+    }
+
+    .detail-summary{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:9px;
+      margin:0 0 12px
+    }
+
+    .detail-stat{
+      background:#f7faff;
+      border:1px solid var(--line);
+      border-radius:9px;
+      padding:10px
+    }
+
+    .detail-stat span{
+      font-size:9px;
+      color:var(--muted);
+      font-weight:800
+    }
+
+    .detail-stat strong{
+      display:block;
+      margin-top:4px;
+      font-size:16px
+    }
+
+    .money-usd{
+      font-weight:900;
+      color:#1769cf
+    }
+
+    .money-khr{
+      font-weight:900;
+      color:#6d4acb
+    }
+
+    .loading{
+      position:fixed;
+      inset:0;
+      background:rgba(238,243,248,.72);
+      z-index:900;
+      display:flex;
+      align-items:center;
+      justify-content:center
+    }
+
+    .loader{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:17px 22px;
+      font-weight:900;
+      box-shadow:0 14px 40px rgba(10,40,70,.16)
+    }
+
+    .toast{
+      position:fixed;
+      right:18px;
+      bottom:18px;
+      z-index:1000;
+      max-width:420px;
+      padding:12px 15px;
+      border-radius:9px;
+      background:#173c32;
+      color:#fff;
+      font-size:12px;
+      font-weight:800;
+      box-shadow:0 12px 35px rgba(0,0,0,.2);
+      display:none
+    }
+
+    .toast.show{display:block}
+    .toast.error{background:#98343d}
+
+    body.shell-embedded .app{
+      display:block;
+      min-height:100vh
+    }
+
+    body.shell-embedded .sidebar{
+      display:none!important
+    }
+
+    body.shell-embedded .main{
+      width:100%;
+      min-width:0
+    }
+
+    @media(max-width:1050px){
+      .app{grid-template-columns:76px minmax(0,1fr)}
+      .brand{font-size:13px}
+      .brand-sub,.nav-title,.nav-item span,.side-note{display:none}
+      .nav-item{justify-content:center;font-size:19px}
+      .form-grid.four{grid-template-columns:1fr 1fr}
+      .detail-summary{grid-template-columns:1fr 1fr}
+      .toolbar{grid-template-columns:1fr 1fr}
+      .toolbar .search-main{grid-column:1/-1}
+    }
+
+    @media(max-width:700px){
+      .app{display:block}
+
+      .sidebar{
+        position:static;
+        height:auto;
+        display:flex;
+        align-items:center;
+        gap:6px;
+        padding:9px
+      }
+
+      .brand{width:60px}
+      .nav-title,.brand-sub,.side-note{display:none}
+
+      .nav-item{
+        width:auto;
+        flex:1;
+        margin:0;
+        font-size:11px;
+        justify-content:center
+      }
+
+      .nav-item span{display:inline}
+      .topbar{padding:10px 12px}
+      .title h1{font-size:19px}
+      .workspace{padding:9px}
+      .summary,.detail-summary{grid-template-columns:1fr 1fr}
+      .form-grid,.form-grid.four,.toolbar{grid-template-columns:1fr}
+      .toolbar .search-main{grid-column:auto}
+      .actions{flex-wrap:wrap}
+      .actions .btn{flex:1}
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="loading" id="loading">
+  <div class="loader" id="loadingText">
+    Connecting to Master Database…
+  </div>
+</div>
+
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="brand">BIG<br>BROTHER</div>
+    <div class="brand-sub">Products Editor</div>
+
+    <div class="nav-title">MASTER PRODUCTS</div>
+
+    <button class="nav-item active" data-page="add">
+      ＋ <span>Add Product</span>
+    </button>
+
+    <button class="nav-item" data-page="details">
+      📋 <span>Product Details and Price</span>
+    </button>
+
+    <div class="side-note">
+      Product Code is the permanent key connecting Sales, Purchase,
+      Customer Prices and Stock.
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <header class="topbar">
+      <div class="title">
+        <h1 id="pageTitle">Add Product</h1>
+        <p id="pageSubtitle">
+          Create a new Master Product.
+        </p>
+      </div>
+
+      <div class="connection" id="connection">
+        Connecting…
+      </div>
+    </header>
+
+    <div class="workspace">
+
+      <!-- ==================================================
+           ADD PRODUCT
+           ================================================== -->
+      <section class="page active" id="page-add">
+        <div class="card">
+
+          <div class="card-head">
+            <div>
+              <div class="card-title">＋ New Product</div>
+              <div class="card-sub">
+                Adds one new product to the BIG BROTHER Master Product list.
+              </div>
+            </div>
+          </div>
+
+          <div class="card-body">
+
+            <form id="addForm">
+
+              <div class="form-grid four">
+
+                <div class="field">
+                  <label>Product Code *</label>
+                  <input
+                    id="aCode"
+                    required
+                    placeholder="Example: KIR-2L"
+                  >
+                  <small>
+                    Permanent key. It cannot be renamed after creation.
+                  </small>
+                </div>
+
+                <div class="field">
+                  <label>Product Name *</label>
+                  <input id="aName" required>
+                </div>
+
+                <div class="field">
+                  <label>Category</label>
+                  <input
+                    id="aCategory"
+                    placeholder="Example: Fresh Milk"
+                  >
+                </div>
+
+                <div class="field">
+                  <label>Unit *</label>
+                  <input
+                    id="aUnit"
+                    required
+                    placeholder="Bottle / Box / Pack"
+                  >
+                </div>
+
+                <div class="field">
+                  <label>Default Price USD *</label>
+                  <input
+                    id="aPrice"
+                    type="number"
+                    min="0"
+                    step="0.0001"
+                    value="0"
+                    required
+                  >
+                </div>
+
+                <div class="field">
+                  <label>Product Barcode</label>
+                  <input id="aBarcode">
+                </div>
+
+                <div class="field">
+                  <label>Status</label>
+                  <select id="aActive">
+                    <option value="true">Active</option>
+                    <option value="false">Inactive</option>
+                  </select>
+                </div>
+
+              </div>
+
+              <div class="info blue" style="margin-top:12px">
+                When the new product is saved, BIG BROTHER automatically
+                creates its column in <strong>Customer Prices</strong>,
+                copies the existing format, and gives every customer this
+                product's Default Price USD. The product also becomes available
+                in <strong>Clients Editor</strong> for supplier linking.
+              </div>
+
+              <div class="actions">
+                <button
+                  type="button"
+                  class="btn ghost"
+                  onclick="resetAddForm()"
+                >
+                  Clear
+                </button>
+
+                <button class="btn green" id="addSaveBtn">
+                  Save New Product
+                </button>
+              </div>
+
+            </form>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================================================
+           PRODUCT DETAILS AND PRICE
+           ================================================== -->
+      <section class="page" id="page-details">
+
+        <div class="summary">
+
+          <div class="summary-card">
+            <span>TOTAL PRODUCTS</span>
+            <strong id="totalProducts">0</strong>
+          </div>
+
+          <div class="summary-card">
+            <span>ACTIVE</span>
+            <strong id="activeProducts">0</strong>
+          </div>
+
+          <div class="summary-card">
+            <span>INACTIVE</span>
+            <strong id="inactiveProducts">0</strong>
+          </div>
+
+          <div class="summary-card">
+            <span>CATEGORIES</span>
+            <strong id="categoryCount">0</strong>
+          </div>
+
+        </div>
+
+        <div class="card" id="productListCard">
+
+          <div class="card-head">
+            <div>
+              <div class="card-title">Product Details and Price</div>
+              <div class="card-sub">
+                Manage Master Product information and inspect all connected selling and purchase prices.
+              </div>
+            </div>
+
+            <button
+              type="button"
+              class="btn ghost"
+              onclick="loadApp(true)"
+            >
+              Refresh
+            </button>
+          </div>
+
+          <div class="toolbar">
+
+            <input
+              class="search search-main"
+              id="productSearch"
+              placeholder="Search Product Code, Name, Category or Barcode…"
+              oninput="renderProductTable()"
+            >
+
+            <select
+              class="search"
+              id="categoryFilter"
+              onchange="renderProductTable()"
+            >
+              <option value="">All categories</option>
+            </select>
+
+            <select
+              class="search"
+              id="statusFilter"
+              onchange="renderProductTable()"
+            >
+              <option value="">All statuses</option>
+              <option value="true">Active</option>
+              <option value="false">Inactive</option>
+            </select>
+
+            <button
+              type="button"
+              class="btn ghost"
+              onclick="clearFilters()"
+            >
+              Clear Filters
+            </button>
+
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Product Code</th>
+                  <th>Product Name</th>
+                  <th>Category</th>
+                  <th>Unit</th>
+                  <th>Default Price USD</th>
+                  <th>Barcode</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+
+              <tbody id="productTableBody"></tbody>
+            </table>
+          </div>
+
+        </div>
+
+        <div class="card hidden" id="productDetailCard">
+
+          <div class="card-head">
+            <div>
+              <div class="card-title" id="detailTitle">
+                Product Details
+              </div>
+
+              <div class="card-sub">
+                <span class="badge blue" id="detailCodeBadge">PRODUCT</span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              class="btn ghost"
+              onclick="closeProductDetail()"
+            >
+              ← Back to Products
+            </button>
+          </div>
+
+          <!-- MASTER PRODUCT INFORMATION -->
+          <div class="section">
+
+            <div class="section-title">
+              <span>Master Product Information</span>
+            </div>
+
+            <div class="form-grid four">
+
+              <div class="field">
+                <label>Product Code</label>
+                <input id="dCode" disabled>
+                <small>
+                  Permanent BIG BROTHER product key.
+                </small>
+              </div>
+
+              <div class="field">
+                <label>Product Name *</label>
+                <input id="dName">
+              </div>
+
+              <div class="field">
+                <label>Category</label>
+                <input id="dCategory">
+              </div>
+
+              <div class="field">
+                <label>Unit *</label>
+                <input id="dUnit">
+              </div>
+
+              <div class="field">
+                <label>Default Price USD *</label>
+                <input
+                  id="dPrice"
+                  type="number"
+                  min="0"
+                  step="0.0001"
+                >
+                <small>
+                  Customers still using the old default automatically move to the new default. Custom prices stay unchanged.
+                </small>
+              </div>
+
+              <div class="field">
+                <label>Product Barcode</label>
+                <input id="dBarcode">
+              </div>
+
+              <div class="field">
+                <label>Status</label>
+                <select id="dActive">
+                  <option value="true">Active</option>
+                  <option value="false">Inactive</option>
+                </select>
+              </div>
+
+            </div>
+
+            <div class="actions">
+              <button
+                type="button"
+                class="btn primary"
+                id="detailSaveBtn"
+                onclick="saveProductDetail()"
+              >
+                Save Product Information
+              </button>
+            </div>
+
+          </div>
+
+          <!-- RELATIONSHIP SUMMARY -->
+          <div class="section">
+
+            <div class="section-title">
+              <span>Product Price Overview</span>
+            </div>
+
+            <div class="detail-summary">
+
+              <div class="detail-stat">
+                <span>CUSTOMERS</span>
+                <strong id="detailCustomerCount">0</strong>
+              </div>
+
+              <div class="detail-stat">
+                <span>DEFAULT PRICE CUSTOMERS</span>
+                <strong id="detailDefaultCustomers">0</strong>
+              </div>
+
+              <div class="detail-stat">
+                <span>CUSTOM PRICE CUSTOMERS</span>
+                <strong id="detailCustomCustomers">0</strong>
+              </div>
+
+              <div class="detail-stat">
+                <span>LINKED CLIENTS / SUPPLIERS</span>
+                <strong id="detailClientCount">0</strong>
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- CUSTOMER SELLING PRICES -->
+          <div class="section">
+
+            <div class="section-title">
+              <span>Customer Selling Prices</span>
+              <span class="badge purple" id="customerPriceCount">
+                0 Customers
+              </span>
+            </div>
+
+            <div class="info blue" style="margin-bottom:11px">
+              These prices come from the existing <strong>Customer Prices</strong>
+              system. Edit individual customer prices from Customers Editor.
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Customer ID</th>
+                    <th>Customer</th>
+                    <th>Location</th>
+                    <th>Default Price USD</th>
+                    <th>Customer Price USD</th>
+                    <th>Price Type</th>
+                    <th>Customer Status</th>
+                  </tr>
+                </thead>
+
+                <tbody id="customerPriceBody"></tbody>
+              </table>
+            </div>
+
+          </div>
+
+          <!-- CLIENT PURCHASE PRICES -->
+          <div class="section">
+
+            <div class="section-title">
+              <span>Client / Supplier Purchase Prices</span>
+              <span class="badge purple" id="clientPriceCount">
+                0 Clients
+              </span>
+            </div>
+
+            <div class="info amber" style="margin-bottom:11px">
+              These are Purchase-side relationships from
+              <strong>Client Products + Client Prices</strong>.
+              Edit supplier products and purchase prices from Clients Editor.
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Client ID</th>
+                    <th>Client Code</th>
+                    <th>Client / Supplier</th>
+                    <th>Purchase Price</th>
+                    <th>Currency</th>
+                    <th>Product Link</th>
+                    <th>Price Status</th>
+                    <th>Effective From</th>
+                  </tr>
+                </thead>
+
+                <tbody id="clientPriceBody"></tbody>
+              </table>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API_URL="https://script.google.com/macros/s/AKfycbzIjs-cNehMxWTZs3ZPAosseGUu1nqACTPo3S4-onLLEYnEgqP6AUK7p3jwb6MaFr7H0w/exec";
+
+const CACHE_KEY="BB_PRODUCTS_EDITOR_CACHE_V1";
+const DETAIL_CACHE_PREFIX="BB_PRODUCTS_EDITOR_DETAIL_V1_";
+const CACHE_MAX_AGE=24*60*60*1000;
+const DETAIL_CACHE_MAX_AGE=3*60*60*1000;
+const SMART_SYNC_MS=30000;
+const REQUEST_TIMEOUT_MS=20000;
+
+const state={
+  products:[],
+  categories:[],
+  selected:null,
+  customerPrices:[],
+  clientPrices:[],
+  detailSummary:{},
+  revision:"0",
+  cacheReady:false,
+  liveLoaded:false,
+  syncTimer:null,
+  syncBusy:false
+};
+
+const $=id=>document.getElementById(id);
+
+const pageInfo={
+  add:[
+    "Add Product",
+    "Create a new Master Product."
+  ],
+  details:[
+    "Product Details and Price",
+    "View complete Product details, Customer Selling Prices and Client Purchase Prices."
+  ]
+};
+
+function esc(value){
+  return String(value??"").replace(
+    /[&<>"']/g,
+    ch=>({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#039;"
+    }[ch])
+  );
+}
+
+function escJs(value){
+  return String(value??"")
+    .replace(/\\/g,"\\\\")
+    .replace(/'/g,"\\'");
+}
+
+function clean(value){
+  return String(value??"").trim();
+}
+
+function num(value){
+  const n=Number(value);
+  return Number.isFinite(n)?n:0;
+}
+
+function usd(value){
+  return "$"+num(value).toFixed(2);
+}
+
+function purchaseMoney(value,currency){
+  return currency==="KHR"
+    ?num(value).toLocaleString()+" ៛"
+    :usd(value);
+}
+
+function showLoading(show,text){
+  $("loading").classList.toggle("hidden",!show);
+  if(text)$("loadingText").textContent=text;
+}
+
+function setConnection(text,type=""){
+  const box=$("connection");
+  box.textContent=text;
+  box.className="connection"+(type?" "+type:"");
+}
+
+function toast(message,error=false){
+  const box=$("toast");
+  box.textContent=message;
+  box.className="toast show"+(error?" error":"");
+
+  clearTimeout(toast.timer);
+
+  toast.timer=setTimeout(
+    ()=>box.className="toast",
+    4200
+  );
+}
+
+function shellParams(){
+  return new URLSearchParams(location.search);
+}
+
+function isEmbeddedWorkspace(){
+  const params=shellParams();
+
+  return (
+    params.get("embed")==="1" ||
+    Boolean(params.get("shellModule"))
+  );
+}
+
+function resolveInitialPage(){
+  const params=shellParams();
+
+  const requested=clean(params.get("view")).toLowerCase();
+
+  if(["add","details"].includes(requested)){
+    return requested;
+  }
+
+  const shellModule=clean(
+    params.get("shellModule")
+  ).toLowerCase();
+
+  if(shellModule==="products-add"){
+    return "add";
+  }
+
+  if(
+    shellModule==="products-details" ||
+    shellModule==="products-editor"
+  ){
+    return "details";
+  }
+
+  return "add";
+}
+
+function applyWorkspaceMode(){
+  document.body.classList.toggle(
+    "shell-embedded",
+    isEmbeddedWorkspace()
+  );
+}
+
+function storageGet(key){
+  try{
+    const raw=localStorage.getItem(key);
+    if(!raw)return null;
+    return JSON.parse(raw);
+  }catch(error){
+    return null;
+  }
+}
+
+function storageSet(key,value){
+  try{
+    localStorage.setItem(
+      key,
+      JSON.stringify(value)
+    );
+    return true;
+  }catch(error){
+    return false;
+  }
+}
+
+function storageRemove(key){
+  try{
+    localStorage.removeItem(key);
+  }catch(error){}
+}
+
+function detailCacheKey(productCode){
+  return DETAIL_CACHE_PREFIX+clean(productCode);
+}
+
+function saveMainCache(){
+  storageSet(CACHE_KEY,{
+    savedAt:Date.now(),
+    revision:state.revision||"0",
+    products:state.products,
+    categories:state.categories
+  });
+}
+
+function loadMainCache(){
+  const cached=storageGet(CACHE_KEY);
+
+  if(
+    !cached ||
+    !Array.isArray(cached.products)
+  ){
+    return false;
+  }
+
+  if(
+    Date.now()-Number(cached.savedAt||0) > CACHE_MAX_AGE
+  ){
+    storageRemove(CACHE_KEY);
+    return false;
+  }
+
+  state.products=cached.products||[];
+  state.categories=cached.categories||[];
+  state.revision=String(cached.revision||"0");
+  state.cacheReady=true;
+
+  renderAllCore();
+  setConnection("Cached · syncing…");
+  showLoading(false);
+
+  return true;
+}
+
+function saveDetailCache(productCode){
+  if(!productCode)return;
+
+  storageSet(
+    detailCacheKey(productCode),
+    {
+      savedAt:Date.now(),
+      revision:state.revision||"0",
+      product:state.selected,
+      customerPrices:state.customerPrices,
+      clientPrices:state.clientPrices,
+      summary:state.detailSummary
+    }
+  );
+}
+
+function loadDetailCache(productCode){
+  const cached=storageGet(
+    detailCacheKey(productCode)
+  );
+
+  if(!cached||!cached.product)return null;
+
+  if(
+    Date.now()-Number(cached.savedAt||0) > DETAIL_CACHE_MAX_AGE
+  ){
+    storageRemove(
+      detailCacheKey(productCode)
+    );
+    return null;
+  }
+
+  return cached;
+}
+
+async function fetchWithTimeout(url,options={}){
+  const controller=new AbortController();
+
+  const timer=setTimeout(
+    ()=>controller.abort(),
+    REQUEST_TIMEOUT_MS
+  );
+
+  try{
+    return await fetch(
+      url,
+      {
+        ...options,
+        signal:controller.signal,
+        redirect:"follow",
+        cache:"no-store"
+      }
+    );
+  }finally{
+    clearTimeout(timer);
+  }
+}
+
+function apiGetJsonp(action,params={}){
+  return new Promise((resolve,reject)=>{
+    const callback=
+      "bbProductsEditorJsonp_"+
+      Date.now()+"_"+
+      Math.random().toString(36).slice(2);
+
+    const url=new URL(API_URL);
+
+    url.searchParams.set("action",action);
+    url.searchParams.set("callback",callback);
+
+    Object.entries(params).forEach(([key,value])=>{
+      if(
+        value!==undefined &&
+        value!==null &&
+        value!==""
+      ){
+        url.searchParams.set(key,value);
+      }
+    });
+
+    const script=document.createElement("script");
+
+    const timer=setTimeout(
+      ()=>{
+        cleanup();
+        reject(
+          new Error("Database request timed out.")
+        );
+      },
+      REQUEST_TIMEOUT_MS
+    );
+
+    function cleanup(){
+      clearTimeout(timer);
+
+      try{
+        delete window[callback];
+      }catch(error){}
+
+      script.remove();
+    }
+
+    window[callback]=data=>{
+      cleanup();
+
+      if(data&&data.success===false){
+        reject(
+          new Error(
+            data.error||
+            "Database request failed."
+          )
+        );
+        return;
+      }
+
+      resolve(data);
+    };
+
+    script.onerror=()=>{
+      cleanup();
+      reject(
+        new Error("Database connection failed.")
+      );
+    };
+
+    script.src=url.toString();
+    document.head.appendChild(script);
+  });
+}
+
+async function apiGet(action,params={}){
+  const url=new URL(API_URL);
+  url.searchParams.set("action",action);
+
+  Object.entries(params).forEach(([key,value])=>{
+    if(
+      value!==undefined &&
+      value!==null &&
+      value!==""
+    ){
+      url.searchParams.set(key,value);
+    }
+  });
+
+  try{
+    const response=await fetchWithTimeout(
+      url.toString()
+    );
+
+    if(!response.ok){
+      throw new Error(
+        "Database request failed ("+
+        response.status+
+        ")."
+      );
+    }
+
+    const data=await response.json();
+
+    if(data&&data.success===false){
+      throw new Error(
+        data.error||
+        "Database request failed."
+      );
+    }
+
+    return data;
+
+  }catch(fetchError){
+    return await apiGetJsonp(
+      action,
+      params
+    );
+  }
+}
+
+async function apiPost(action,payload={}){
+  const response=await fetchWithTimeout(
+    API_URL,
+    {
+      method:"POST",
+      headers:{
+        "Content-Type":"text/plain;charset=utf-8"
+      },
+      body:JSON.stringify({
+        action,
+        ...payload
+      })
+    }
+  );
+
+  if(!response.ok){
+    throw new Error(
+      "Database save failed ("+
+      response.status+
+      ")."
+    );
+  }
+
+  const data=await response.json();
+
+  if(data&&data.success===false){
+    throw new Error(
+      data.error||
+      "Database request failed."
+    );
+  }
+
+  return data;
+}
+
+document
+  .querySelectorAll(".nav-item")
+  .forEach(button=>
+    button.addEventListener(
+      "click",
+      ()=>openPage(button.dataset.page)
+    )
+  );
+
+function openPage(name){
+  if(!pageInfo[name])name="add";
+
+  document
+    .querySelectorAll(".nav-item")
+    .forEach(button=>
+      button.classList.toggle(
+        "active",
+        button.dataset.page===name
+      )
+    );
+
+  document
+    .querySelectorAll(".page")
+    .forEach(page=>
+      page.classList.remove("active")
+    );
+
+  $("page-"+name).classList.add("active");
+
+  $("pageTitle").textContent=pageInfo[name][0];
+  $("pageSubtitle").textContent=pageInfo[name][1];
+
+  if(!isEmbeddedWorkspace()){
+    const url=new URL(location.href);
+    url.searchParams.set("view",name);
+
+    history.replaceState(
+      null,
+      "",
+      url.pathname+url.search
+    );
+  }
+}
+
+function renderAllCore(){
+  updateSummaries();
+  populateCategoryFilter();
+  renderProductTable();
+}
+
+function updateSummaries(){
+  const active=state.products
+    .filter(item=>item.active)
+    .length;
+
+  const categories=new Set(
+    state.products
+      .map(item=>clean(item.category))
+      .filter(Boolean)
+  );
+
+  $("totalProducts").textContent=
+    state.products.length;
+
+  $("activeProducts").textContent=
+    active;
+
+  $("inactiveProducts").textContent=
+    state.products.length-active;
+
+  $("categoryCount").textContent=
+    categories.size;
+}
+
+function populateCategoryFilter(){
+  const current=$("categoryFilter").value;
+
+  const categories=[
+    ...new Set(
+      state.products
+        .map(item=>clean(item.category))
+        .filter(Boolean)
+    )
+  ].sort();
+
+  state.categories=categories;
+
+  $("categoryFilter").innerHTML=
+    '<option value="">All categories</option>'+
+    categories.map(category=>
+      '<option value="'+esc(category)+'">'+
+      esc(category)+
+      '</option>'
+    ).join("");
+
+  if(categories.includes(current)){
+    $("categoryFilter").value=current;
+  }
+}
+
+function applyBootstrap(data){
+  state.products=
+    Array.isArray(data.products)
+      ?data.products
+      :[];
+
+  state.categories=
+    Array.isArray(data.categories)
+      ?data.categories
+      :[];
+
+  state.revision=String(
+    data.revision||
+    state.revision||
+    "0"
+  );
+
+  state.liveLoaded=true;
+
+  renderAllCore();
+  saveMainCache();
+
+  setConnection(
+    "Connected · "+
+    (data.version||"Master Database"),
+    "ok"
+  );
+}
+
+async function loadApp(force=false){
+  const hasCache=
+    state.cacheReady||
+    loadMainCache();
+
+  if(!hasCache){
+    showLoading(
+      true,
+      "Loading Products Database…"
+    );
+
+    setConnection("Connecting…");
+
+  }else if(force){
+    setConnection("Refreshing…");
+  }
+
+  try{
+    const data=await apiGet(
+      "productEditorBootstrap",
+      force
+        ?{force:"true"}
+        :{}
+    );
+
+    applyBootstrap(data);
+
+  }catch(error){
+    if(hasCache){
+      setConnection(
+        "Offline Cache",
+        "bad"
+      );
+
+      toast(
+        "Live sync failed. Showing saved device data.",
+        true
+      );
+
+    }else{
+      setConnection(
+        "Connection Error",
+        "bad"
+      );
+
+      toast(
+        error.message,
+        true
+      );
+    }
+
+  }finally{
+    showLoading(false);
+  }
+}
+
+function updateProductInState(product){
+  if(!product||!product.code)return;
+
+  const index=state.products.findIndex(
+    item=>
+      clean(item.code).toLowerCase()===
+      clean(product.code).toLowerCase()
+  );
+
+  if(index>=0){
+    state.products[index]={
+      ...state.products[index],
+      ...product
+    };
+  }else{
+    state.products.push(product);
+  }
+
+  state.products.sort(
+    (a,b)=>
+      clean(a.name)
+        .localeCompare(clean(b.name))
+  );
+
+  renderAllCore();
+  saveMainCache();
+}
+
+function scheduleSilentRefresh(delay=350){
+  clearTimeout(
+    scheduleSilentRefresh.timer
+  );
+
+  scheduleSilentRefresh.timer=
+    setTimeout(
+      ()=>silentRefresh(),
+      delay
+    );
+}
+
+async function silentRefresh(){
+  if(state.syncBusy)return;
+
+  state.syncBusy=true;
+
+  try{
+    const data=await apiGet(
+      "productEditorBootstrap"
+    );
+
+    applyBootstrap(data);
+
+  }catch(error){
+  }finally{
+    state.syncBusy=false;
+  }
+}
+
+async function checkSmartRevision(){
+  if(state.syncBusy||document.hidden)return;
+
+  state.syncBusy=true;
+
+  try{
+    const result=await apiGet(
+      "productEditorRevision"
+    );
+
+    const revision=String(
+      result.revision||"0"
+    );
+
+    if(
+      state.revision!=="0" &&
+      revision!=="0" &&
+      revision!==state.revision
+    ){
+      const data=await apiGet(
+        "productEditorBootstrap",
+        {force:"true"}
+      );
+
+      applyBootstrap(data);
+
+      if(state.selected&&state.selected.code){
+        await refreshSelectedProduct(
+          state.selected.code,
+          true
+        );
+      }
+
+    }else if(state.revision==="0"){
+      state.revision=revision;
+      saveMainCache();
+    }
+
+  }catch(error){
+  }finally{
+    state.syncBusy=false;
+  }
+}
+
+function startSmartSync(){
+  clearInterval(state.syncTimer);
+
+  state.syncTimer=setInterval(
+    checkSmartRevision,
+    SMART_SYNC_MS
+  );
+}
+
+function addPayload(){
+  return{
+    productCode:
+      $("aCode").value.trim(),
+    productName:
+      $("aName").value.trim(),
+    category:
+      $("aCategory").value.trim(),
+    unit:
+      $("aUnit").value.trim(),
+    usdPrice:
+      $("aPrice").value,
+    productBarcode:
+      $("aBarcode").value.trim(),
+    active:
+      $("aActive").value
+  };
+}
+
+$("addForm").addEventListener(
+  "submit",
+  async event=>{
+    event.preventDefault();
+
+    const data=addPayload();
+
+    if(
+      !data.productCode ||
+      !data.productName ||
+      !data.unit
+    ){
+      return toast(
+        "Product Code, Product Name and Unit are required.",
+        true
+      );
+    }
+
+    const button=$("addSaveBtn");
+
+    button.disabled=true;
+    button.textContent="Saving…";
+
+    setConnection("Saving product…");
+
+    try{
+      const result=await apiPost(
+        "saveProduct",
+        data
+      );
+
+      if(result.revision){
+        state.revision=String(result.revision);
+      }
+
+      updateProductInState(
+        result.product
+      );
+
+      toast(
+        "Product "+
+        result.product.code+
+        " created successfully. Customer Prices column was synchronized."
+      );
+
+      resetAddForm();
+      openPage("details");
+
+      await openProductDetail(
+        result.product.code
+      );
+
+      scheduleSilentRefresh();
+
+    }catch(error){
+      toast(
+        error.message,
+        true
+      );
+
+    }finally{
+      button.disabled=false;
+      button.textContent="Save New Product";
+
+      if(state.liveLoaded){
+        setConnection(
+          "Connected · V6.6.0",
+          "ok"
+        );
+      }
+    }
+  }
+);
+
+function resetAddForm(){
+  $("addForm").reset();
+  $("aPrice").value="0";
+  $("aActive").value="true";
+}
+
+function filteredProducts(){
+  const query=
+    $("productSearch")
+      .value
+      .trim()
+      .toLowerCase();
+
+  const category=
+    $("categoryFilter").value;
+
+  const status=
+    $("statusFilter").value;
+
+  return state.products.filter(item=>{
+    const haystack=[
+      item.code,
+      item.name,
+      item.category,
+      item.unit,
+      item.barcode,
+      item.productBarcode
+    ]
+      .join(" ")
+      .toLowerCase();
+
+    return (
+      (!query||haystack.includes(query)) &&
+      (!category||item.category===category) &&
+      (
+        !status ||
+        String(Boolean(item.active))===status
+      )
+    );
+  });
+}
+
+function renderProductTable(){
+  const list=filteredProducts();
+
+  $("productTableBody").innerHTML=
+    list.length
+      ?list.map(item=>
+        "<tr>"+
+        "<td><strong>"+
+        esc(item.code)+
+        "</strong></td>"+
+        "<td>"+
+        esc(item.name)+
+        "</td>"+
+        "<td>"+
+        esc(item.category||"—")+
+        "</td>"+
+        "<td>"+
+        esc(item.unit||"—")+
+        "</td>"+
+        "<td class='money-usd'>"+
+        usd(item.usdPrice)+
+        "</td>"+
+        "<td>"+
+        esc(item.barcode||item.productBarcode||"—")+
+        "</td>"+
+        "<td>"+
+        (
+          item.active
+            ?"<span class='badge green'>Active</span>"
+            :"<span class='badge red'>Inactive</span>"
+        )+
+        "</td>"+
+        "<td><button class='row-btn' onclick=\"openProductDetail('"+
+        escJs(item.code)+
+        "')\">Manage</button></td>"+
+        "</tr>"
+      ).join("")
+      :"<tr><td colspan='8' class='empty'>No products found.</td></tr>";
+}
+
+function clearFilters(){
+  $("productSearch").value="";
+  $("categoryFilter").value="";
+  $("statusFilter").value="";
+  renderProductTable();
+}
+
+function fillProductDetail(product){
+  state.selected={...product};
+
+  $("productListCard")
+    .classList.add("hidden");
+
+  $("productDetailCard")
+    .classList.remove("hidden");
+
+  $("detailTitle").textContent=
+    product.name||"Product Details";
+
+  $("detailCodeBadge").textContent=
+    product.code;
+
+  $("dCode").value=
+    product.code||"";
+
+  $("dName").value=
+    product.name||"";
+
+  $("dCategory").value=
+    product.category||"";
+
+  $("dUnit").value=
+    product.unit||"";
+
+  $("dPrice").value=
+    num(product.usdPrice);
+
+  $("dBarcode").value=
+    product.barcode||
+    product.productBarcode||
+    "";
+
+  $("dActive").value=
+    String(Boolean(product.active));
+}
+
+function applyDetail(result){
+  state.selected=result.product;
+  state.customerPrices=
+    Array.isArray(result.customerPrices)
+      ?result.customerPrices
+      :[];
+
+  state.clientPrices=
+    Array.isArray(result.clientPrices)
+      ?result.clientPrices
+      :[];
+
+  state.detailSummary=
+    result.summary||{};
+
+  if(result.revision){
+    state.revision=String(result.revision);
+  }
+
+  fillProductDetail(result.product);
+  renderRelationshipSummary();
+  renderCustomerPrices();
+  renderClientPrices();
+
+  saveDetailCache(result.product.code);
+  saveMainCache();
+}
+
+async function openProductDetail(productCode){
+  const cached=loadDetailCache(productCode);
+
+  if(cached){
+    state.selected=cached.product;
+    state.customerPrices=cached.customerPrices||[];
+    state.clientPrices=cached.clientPrices||[];
+    state.detailSummary=cached.summary||{};
+
+    fillProductDetail(
+      cached.product
+    );
+
+    renderRelationshipSummary();
+    renderCustomerPrices();
+    renderClientPrices();
+
+  }else{
+    const basic=state.products.find(
+      item=>
+        clean(item.code).toLowerCase()===
+        clean(productCode).toLowerCase()
+    );
+
+    if(basic){
+      fillProductDetail(basic);
+    }
+
+    state.customerPrices=[];
+    state.clientPrices=[];
+    state.detailSummary={};
+
+    renderRelationshipSummary();
+    renderCustomerPrices();
+    renderClientPrices();
+
+    showLoading(
+      true,
+      "Loading complete Product details and prices…"
+    );
+  }
+
+  try{
+    await refreshSelectedProduct(
+      productCode,
+      true
+    );
+
+  }catch(error){
+    if(!cached){
+      toast(
+        error.message,
+        true
+      );
+    }else{
+      toast(
+        "Showing saved Product detail. Live detail sync failed.",
+        true
+      );
+    }
+
+  }finally{
+    showLoading(false);
+  }
+}
+
+async function refreshSelectedProduct(
+  productCode,
+  render=true
+){
+  const result=await apiGet(
+    "productEditorDetail",
+    {productCode}
+  );
+
+  if(render){
+    applyDetail(result);
+  }else{
+    state.selected=result.product;
+    state.customerPrices=result.customerPrices||[];
+    state.clientPrices=result.clientPrices||[];
+    state.detailSummary=result.summary||{};
+    saveDetailCache(result.product.code);
+  }
+
+  return result;
+}
+
+function closeProductDetail(){
+  $("productDetailCard")
+    .classList.add("hidden");
+
+  $("productListCard")
+    .classList.remove("hidden");
+
+  state.selected=null;
+  state.customerPrices=[];
+  state.clientPrices=[];
+  state.detailSummary={};
+}
+
+function detailPayload(){
+  return{
+    originalProductCode:
+      $("dCode").value,
+    productCode:
+      $("dCode").value,
+    productName:
+      $("dName").value.trim(),
+    category:
+      $("dCategory").value.trim(),
+    unit:
+      $("dUnit").value.trim(),
+    usdPrice:
+      $("dPrice").value,
+    productBarcode:
+      $("dBarcode").value.trim(),
+    active:
+      $("dActive").value
+  };
+}
+
+async function saveProductDetail(){
+  const data=detailPayload();
+
+  if(
+    !data.productName ||
+    !data.unit
+  ){
+    return toast(
+      "Product Name and Unit are required.",
+      true
+    );
+  }
+
+  const button=$("detailSaveBtn");
+
+  button.disabled=true;
+  button.textContent="Saving…";
+
+  setConnection("Saving product…");
+
+  try{
+    const result=await apiPost(
+      "saveProduct",
+      data
+    );
+
+    if(result.revision){
+      state.revision=String(result.revision);
+    }
+
+    updateProductInState(
+      result.product
+    );
+
+    const migration=
+      result.defaultPriceMigration||{};
+
+    let message="Product information updated.";
+
+    if(
+      Number(migration.updatedCustomers||0)>0
+    ){
+      message+=
+        " "+
+        migration.updatedCustomers+
+        " customers using the old default price were updated; custom customer prices were preserved.";
+    }
+
+    toast(message);
+
+    await refreshSelectedProduct(
+      result.product.code,
+      true
+    );
+
+    setConnection(
+      "Connected · V6.6.0",
+      "ok"
+    );
+
+    scheduleSilentRefresh();
+
+  }catch(error){
+    toast(
+      error.message,
+      true
+    );
+
+  }finally{
+    button.disabled=false;
+    button.textContent=
+      "Save Product Information";
+  }
+}
+
+function renderRelationshipSummary(){
+  $("detailCustomerCount").textContent=
+    num(state.detailSummary.totalCustomers);
+
+  $("detailDefaultCustomers").textContent=
+    num(state.detailSummary.defaultPriceCustomers);
+
+  $("detailCustomCustomers").textContent=
+    num(state.detailSummary.customPriceCustomers);
+
+  $("detailClientCount").textContent=
+    num(state.detailSummary.linkedClients);
+}
+
+function renderCustomerPrices(){
+  $("customerPriceCount").textContent=
+    state.customerPrices.length+
+    " Customers";
+
+  $("customerPriceBody").innerHTML=
+    state.customerPrices.length
+      ?state.customerPrices.map(item=>
+        "<tr>"+
+        "<td><strong>"+
+        esc(item.customerId||"—")+
+        "</strong></td>"+
+        "<td>"+
+        esc(item.customerName||"—")+
+        "</td>"+
+        "<td>"+
+        esc(item.locationCode||"—")+
+        "</td>"+
+        "<td class='money-usd'>"+
+        usd(item.defaultPriceUSD)+
+        "</td>"+
+        "<td class='money-usd'>"+
+        usd(item.customerPriceUSD)+
+        "</td>"+
+        "<td>"+
+        (
+          item.priceType==="Custom"
+            ?"<span class='badge amber'>CUSTOM</span>"
+            :"<span class='badge green'>DEFAULT</span>"
+        )+
+        "</td>"+
+        "<td>"+
+        (
+          item.customerActive
+            ?"<span class='badge green'>Active</span>"
+            :"<span class='badge red'>Inactive</span>"
+        )+
+        "</td>"+
+        "</tr>"
+      ).join("")
+      :"<tr><td colspan='7' class='empty'>No Customer Prices found.</td></tr>";
+}
+
+function renderClientPrices(){
+  $("clientPriceCount").textContent=
+    state.clientPrices.length+
+    " Clients";
+
+  $("clientPriceBody").innerHTML=
+    state.clientPrices.length
+      ?state.clientPrices.map(item=>
+        "<tr>"+
+        "<td><strong>"+
+        esc(item.clientId||"—")+
+        "</strong></td>"+
+        "<td>"+
+        esc(item.clientCode||"—")+
+        "</td>"+
+        "<td>"+
+        esc(item.clientName||"—")+
+        "</td>"+
+        "<td class='"+(
+          item.currency==="KHR"
+            ?"money-khr"
+            :"money-usd"
+        )+"'>"+
+        purchaseMoney(
+          item.purchasePrice,
+          item.currency
+        )+
+        "</td>"+
+        "<td>"+
+        esc(item.currency||"USD")+
+        "</td>"+
+        "<td>"+
+        (
+          item.linkedActive
+            ?"<span class='badge green'>LINKED</span>"
+            :"<span class='badge red'>INACTIVE LINK</span>"
+        )+
+        "</td>"+
+        "<td>"+
+        (
+          item.priceActive
+            ?"<span class='badge green'>ACTIVE PRICE</span>"
+            :"<span class='badge amber'>NO ACTIVE PRICE</span>"
+        )+
+        "</td>"+
+        "<td>"+
+        esc(item.effectiveFrom||"—")+
+        "</td>"+
+        "</tr>"
+      ).join("")
+      :"<tr><td colspan='8' class='empty'>No Client / Supplier is linked to this product yet.</td></tr>";
+}
+
+document.addEventListener(
+  "visibilitychange",
+  ()=>{
+    if(!document.hidden){
+      checkSmartRevision();
+    }
+  }
+);
+
+window.addEventListener(
+  "storage",
+  event=>{
+    if(
+      event.key!==CACHE_KEY ||
+      !event.newValue
+    ){
+      return;
+    }
+
+    try{
+      const cached=
+        JSON.parse(event.newValue);
+
+      if(
+        !Array.isArray(
+          cached.products
+        )
+      ){
+        return;
+      }
+
+      state.products=
+        cached.products||[];
+
+      state.categories=
+        cached.categories||[];
+
+      state.revision=String(
+        cached.revision||
+        state.revision||
+        "0"
+      );
+
+      renderAllCore();
+
+    }catch(error){}
+  }
+);
+
+// FAST START
+applyWorkspaceMode();
+openPage(resolveInitialPage());
+loadMainCache();
+loadApp(false);
+startSmartSync();
+</script>
+
+</body>
+</html>
