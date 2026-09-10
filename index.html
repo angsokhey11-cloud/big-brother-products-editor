@@ -6,15 +6,15 @@
 <style>html,body{margin:0;min-height:100%;background:#eef3f8;font-family:Arial,sans-serif}.bb-loader{min-height:100vh;display:flex;align-items:center;justify-content:center}.bb-card{background:#fff;border:1px solid #d9e2ef;border-radius:14px;padding:22px 28px;box-shadow:0 8px 30px #173a6615;color:#17457a;font-weight:800}.bb-sub{margin-top:6px;color:#6b7280;font-size:12px;font-weight:600}</style>
 </head>
 <body>
-<div class="bb-loader"><div class="bb-card">Loading BIG BROTHER Products Editor…<div class="bb-sub">Secure Supabase database</div></div></div>
+<div class="bb-loader"><div class="bb-card">Loading BIG BROTHER Products Editor…<div class="bb-loader-sub">Secure Supabase database</div></div></div>
 <script>
 (async function(){
   try{
-    const response=await fetch('legacy-google-v1.html?v=20260910-1',{cache:'no-store'});
+    const response=await fetch('legacy-google-v1.html?v=20260910-2',{cache:'no-store'});
     if(!response.ok)throw new Error('Could not load Products Editor source.');
     let html=await response.text();
 
-    const adapter='<scr'+'ipt src="supabase-products-adapter.js?v=20260910-1"></scr'+'ipt>';
+    const adapter='<scr'+'ipt src="supabase-products-adapter.js?v=20260910-2"></scr'+'ipt>';
     const headClose=html.toLowerCase().indexOf('</head>');
     if(headClose<0)throw new Error('Products Editor source is missing </head>.');
     html=html.slice(0,headClose)+adapter+'\n'+html.slice(headClose);
@@ -28,17 +28,23 @@ ${marker}`;
     if(!html.includes(marker))throw new Error('Products Editor initialization marker was not found.');
     html=html.replace(marker,replacement);
 
-    html=html.replace('<title>BIG BROTHER — Products Editor V1.0</title>','<title>BIG BROTHER — Products Editor Supabase</title>');
+    html=html.replace('<title>BIG BROTHER — Products Editor V1.0</title>','<title>BIG BROTHER — Products Editor Supabase Dual Currency</title>');
     html=html.replaceAll('Master Database','Supabase Database');
     html=html.replaceAll('Connected · V6.6.0','Connected · Supabase DEV');
     html=html.replace('Customer Prices column was synchronized.','Customer Prices were synchronized in Supabase.');
+    html=html.replace("product's Default Price USD.","product's Default Price USD and KHR.");
+
+    const bodyClose=html.toLowerCase().lastIndexOf('</body>');
+    if(bodyClose<0)throw new Error('Products Editor source is missing </body>.');
+    const dual='<scr'+'ipt src="dual-currency-pricing.js?v=20260910-1"></scr'+'ipt>\n';
+    html=html.slice(0,bodyClose)+dual+html.slice(bodyClose);
 
     document.open();
     document.write(html);
     document.close();
   }catch(error){
     console.error(error);
-    document.body.innerHTML='<div class="bb-loader"><div class="bb-card">Could not open Products Editor<div class="bb-sub">'+String(error?.message||error)+'</div></div></div>';
+    document.body.innerHTML='<div class="bb-loader"><div class="bb-card">Could not open Products Editor<div class="bb-sub">'+String(error&&error.message||error)+'</div></div></div>';
   }
 })();
 </script>
