@@ -11,6 +11,8 @@ const num=v=>{const n=Number(v);return Number.isFinite(n)?n:0};
 let data=null;
 let editingId=0;
 let loadingCode='';
+let loadedCode='';
+let watchTimer=null;
 
 function notify(message,error=false){
   try{
@@ -81,40 +83,60 @@ function ensureSection(){
       '<div class="bb-su-field"><label>Base Unit</label><input id="bbSellingUnitBase" readonly></div>'+
       '<div class="bb-su-actions"><button type="button" class="bb-su-save" id="bbSellingUnitSave">Add Unit</button><button type="button" class="bb-su-cancel" id="bbSellingUnitCancel" hidden>Cancel</button></div>'+
     '</div>'+
-    '<div class="table-wrap"><table><thead><tr><th>Apply To</th><th>Selling Unit</th><th>Conversion</th><th>Status</th><th>Action</th></tr></thead><tbody id="bbSellingUnitBody"></tbody></table></div>';
+    '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin:2px 0 8px">'+
+      '<strong style="font-size:11px;color:#173f77">Existing Selling Units</strong>'+
+      '<button type="button" class="bb-su-row-btn bb-su-edit" id="bbSellingUnitRefresh">Refresh</button>'+
+    '</div>'+
+    '<div class="table-wrap"><table><thead><tr><th>Apply To</th><th>Selling Unit</th><th>Conversion</th><th>Status</th><th>Action</th></tr></thead><tbody id="bbSellingUnitBody"><tr><td colspan="5" class="bb-su-empty">Select a product to load selling units.</td></tr></tbody></table></div>';
 
   sections[0].insertAdjacentElement('afterend',section);
 
   $('bbSellingUnitTarget').addEventListener('change',syncBaseUnit);
   $('bbSellingUnitSave').addEventListener('click',saveUnit);
   $('bbSellingUnitCancel').addEventListener('click',resetForm);
+  $('bbSellingUnitRefresh').addEventListener('click',()=>load(clean($('dCode')?.value),true));
 
   return section;
 }
 
+function fallbackProduct(){
+  return {
+    productCode:clean(data?.product?.productCode||$('dCode')?.value),
+    productName:clean(data?.product?.productName||$('dName')?.value||$('detailTitle')?.textContent||'Selected Product'),
+    baseUnit:clean(data?.product?.baseUnit||$('dUnit')?.value||'Unit')
+  };
+}
+
 function targetOptions(){
-  const product=data?.product||{};
+  const product=fallbackProduct();
   const groups=Array.isArray(data?.groups)?data.groups:[];
-  return [
-    {
-      value:'PRODUCT|'+clean(product.productCode),
-      label:clean(product.productName)+' (This Product)',
-      baseUnit:clean(product.baseUnit)||'Unit'
-    },
-    ...groups.map(g=>({
+  const list=[];
+  if(product.productCode){
+    list.push({
+      value:'PRODUCT|'+product.productCode,
+      label:(product.productName||product.productCode)+' (This Product)',
+      baseUnit:product.baseUnit||'Unit'
+    });
+  }
+  groups.forEach(g=>{
+    if(!clean(g.groupCode))return;
+    list.push({
       value:'GROUP|'+clean(g.groupCode),
-      label:clean(g.groupName)+' (Product Group)',
-      baseUnit:clean(product.baseUnit)||'Unit'
-    }))
-  ];
+      label:(clean(g.groupName)||clean(g.groupCode))+' (Product Group)',
+      baseUnit:product.baseUnit||'Unit'
+    });
+  });
+  return list;
 }
 
 function populateTarget(){
   const select=$('bbSellingUnitTarget');
-  if(!select||!data)return;
+  if(!select)return;
   const current=select.value;
   const options=targetOptions();
-  select.innerHTML=options.map(x=>'<option value="'+esc(x.value)+'">'+esc(x.label)+'</option>').join('');
+  select.innerHTML=options.length
+    ?options.map(x=>'<option value="'+esc(x.value)+'">'+esc(x.label)+'</option>').join('')
+    :'<option value="">Select a product first</option>';
   if(options.some(x=>x.value===current))select.value=current;
   syncBaseUnit();
 }
@@ -122,7 +144,7 @@ function populateTarget(){
 function syncBaseUnit(){
   const select=$('bbSellingUnitTarget');
   const current=targetOptions().find(x=>x.value===select?.value);
-  if($('bbSellingUnitBase'))$('bbSellingUnitBase').value=current?.baseUnit||clean(data?.product?.baseUnit)||'Unit';
+  if($('bbSellingUnitBase'))$('bbSellingUnitBase').value=current?.baseUnit||fallbackProduct().baseUnit||'Unit';
 }
 
 function fmt(v){
@@ -186,31 +208,69 @@ function editUnit(id){
   $('bbSellingUnitName').focus();
 }
 
-async function load(productCode){
+async function load(productCode,force=false){
   const code=clean(productCode||$('dCode')?.value);
-  if(!code)return;
-  if(loadingCode===code)return;
+  ensureSection();
+  populateTarget();
+
+  if(!code){
+    const body=$('bbSellingUnitBody');
+    if(body)body.innerHTML='<tr><td colspan="5" class="bb-su-empty">Select a product to load selling units.</td></tr>';
+    return false;
+  }
+
+  if(!force && loadedCode===code && data?.product?.productCode===code){
+    render();
+    return true;
+  }
+  if(loadingCode===code)return false;
   loadingCode=code;
 
-  ensureSection();
   const body=$('bbSellingUnitBody');
-  if(body)body.innerHTML='<tr><td colspan="5" class="bb-su-empty">Loading selling units…</td></tr>';
+  if(body)body.innerHTML='<tr><td colspan="5" class="bb-su-empty">Loading existing selling units…</td></tr>';
 
   try{
-    data=await window.BBProductsAdapter.apiGet('productSellingUnitDetail',{productCode:code});
-    if(clean($('dCode')?.value)!==code)return;
+    if(!window.BBProductsAdapter?.apiGet){
+      throw new Error('Products Editor database adapter is not ready.');
+    }
+
+    const result=await window.BBProductsAdapter.apiGet('productSellingUnitDetail',{productCode:code});
+    if(clean($('dCode')?.value)!==code)return false;
+
+    data=result||{};
+    loadedCode=code;
     render();
     resetForm();
+    return true;
   }catch(error){
-    if(body)body.innerHTML='<tr><td colspan="5" class="bb-su-empty">Could not load selling units.</td></tr>';
-    notify(error?.message||error,true);
+    data={
+      product:{
+        productCode:code,
+        productName:clean($('dName')?.value||$('detailTitle')?.textContent||code),
+        baseUnit:clean($('dUnit')?.value||'Unit')
+      },
+      groups:[],
+      units:[]
+    };
+    populateTarget();
+    const message=clean(error?.message||error)||'Unknown database error';
+    if(body)body.innerHTML='<tr><td colspan="5" class="bb-su-empty">Could not load existing setup: '+esc(message)+'</td></tr>';
+    notify(message,true);
+    return false;
   }finally{
     if(loadingCode===code)loadingCode='';
   }
 }
 
 async function saveUnit(){
-  if(!data)return;
+  const code=clean($('dCode')?.value);
+  if(!code)return notify('Please open a Product first.',true);
+
+  if(!data || clean(data?.product?.productCode)!==code){
+    const ready=await load(code,true);
+    if(!ready)return;
+  }
+
   const target=clean($('bbSellingUnitTarget')?.value).split('|');
   const name=clean($('bbSellingUnitName')?.value);
   const qty=num($('bbSellingUnitQty')?.value);
@@ -237,7 +297,8 @@ async function saveUnit(){
       active:true
     });
     notify(editingId?'Selling unit updated.':'Selling unit added.');
-    await load(clean($('dCode')?.value));
+    loadedCode='';
+    await load(clean($('dCode')?.value),true);
   }catch(error){
     notify(error?.message||error,true);
   }finally{
@@ -278,15 +339,25 @@ function install(){
   const originalClose=window.closeProductDetail;
   if(typeof originalClose==='function'&&!originalClose.__bbSellingUnitWrapped){
     const wrapped=function(){
-      data=null;editingId=0;loadingCode='';
+      data=null;editingId=0;loadingCode='';loadedCode='';
       return originalClose.apply(this,arguments);
     };
     wrapped.__bbSellingUnitWrapped=true;
     window.closeProductDetail=wrapped;
   }
 
-  const code=clean($('dCode')?.value);
-  if(code&&!$('productDetailCard')?.classList.contains('hidden'))load(code);
+  function watchSelectedProduct(){
+    const card=$('productDetailCard');
+    const code=clean($('dCode')?.value);
+    populateTarget();
+
+    if(!card || card.classList.contains('hidden') || !code)return;
+    if(code!==loadedCode && code!==loadingCode)load(code,true);
+  }
+
+  clearInterval(watchTimer);
+  watchTimer=setInterval(watchSelectedProduct,350);
+  watchSelectedProduct();
 }
 
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});
