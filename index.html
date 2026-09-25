@@ -19,7 +19,7 @@
     if(!response.ok)throw new Error('Could not load Products Editor source.');
     let html=await response.text();
 
-    const adapter='<scr'+'ipt src="supabase-products-adapter.js?v=20260910-2"></scr'+'ipt>';
+    const adapter='<scr'+'ipt src="supabase-products-adapter.js?v=20260925-sellingunits1"></scr'+'ipt>';
     const headClose=html.toLowerCase().indexOf('</head>');
     if(headClose<0)throw new Error('Products Editor source is missing </head>.');
     html=html.slice(0,headClose)+adapter+'\n'+html.slice(headClose);
@@ -42,7 +42,8 @@ ${marker}`;
     const bodyClose=html.toLowerCase().lastIndexOf('</body>');
     if(bodyClose<0)throw new Error('Products Editor source is missing </body>.');
     const dual='<scr'+'ipt src="dual-currency-pricing.js?v=20260910-2"></scr'+'ipt>\n';
-    html=html.slice(0,bodyClose)+dual+html.slice(bodyClose);
+    const sellingUnits='<scr'+'ipt src="product-selling-units-v1.js?v=20260925-1"></scr'+'ipt>\n';
+    html=html.slice(0,bodyClose)+dual+sellingUnits+html.slice(bodyClose);
 
     document.open();
     document.write(html);
