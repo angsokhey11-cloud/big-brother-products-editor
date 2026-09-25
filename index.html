@@ -42,7 +42,7 @@ ${marker}`;
     const bodyClose=html.toLowerCase().lastIndexOf('</body>');
     if(bodyClose<0)throw new Error('Products Editor source is missing </body>.');
     const dual='<scr'+'ipt src="dual-currency-pricing.js?v=20260910-2"></scr'+'ipt>\n';
-    const sellingUnits='<scr'+'ipt src="product-selling-units-v1.js?v=20260925-1"></scr'+'ipt>\n';
+    const sellingUnits='<scr'+'ipt src="product-selling-units-v1.js?v=20260925-2"></scr'+'ipt>\n';
     html=html.slice(0,bodyClose)+dual+sellingUnits+html.slice(bodyClose);
 
     document.open();
