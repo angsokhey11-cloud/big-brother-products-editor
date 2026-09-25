@@ -91,6 +91,10 @@
         return rpc('bb_product_editor_detail',{
           p_product_code:String(params.productCode||'')
         });
+      case 'productSellingUnitDetail':
+        return rpc('bb_product_selling_unit_editor_detail',{
+          p_product_code:String(params.productCode||'')
+        });
       default:
         throw new Error('Unsupported Products Editor read action: '+action);
     }
@@ -100,6 +104,12 @@
     switch(String(action||'')){
       case 'saveProduct':
         return rpc('bb_product_editor_save',{p_payload:payload||{}});
+      case 'saveProductSellingUnit':
+        return rpc('bb_product_selling_unit_editor_save',{p_payload:payload||{}});
+      case 'deleteProductSellingUnit':
+        return rpc('bb_product_selling_unit_editor_delete',{
+          p_selling_unit_id:Number(payload.sellingUnitId||0)
+        });
       default:
         throw new Error('Unsupported Products Editor write action: '+action);
     }
