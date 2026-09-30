@@ -576,16 +576,16 @@
 
   <aside class="sidebar">
     <div class="brand">BIG<br>BROTHER</div>
-    <div class="brand-sub">Products Editor</div>
+    <div class="brand-sub">Products & Services</div>
 
     <div class="nav-title">MASTER PRODUCTS</div>
 
     <button class="nav-item active" data-page="add">
-      ＋ <span>Add Product</span>
+      ＋ <span>Add Product / Service</span>
     </button>
 
     <button class="nav-item" data-page="details">
-      📋 <span>Product Details and Price</span>
+      📋 <span>Items & Prices</span>
     </button>
 
     <div class="side-note">
@@ -598,9 +598,9 @@
 
     <header class="topbar">
       <div class="title">
-        <h1 id="pageTitle">Add Product</h1>
+        <h1 id="pageTitle">Add Product / Service</h1>
         <p id="pageSubtitle">
-          Create a new Master Product.
+          Create a new Product or Service.
         </p>
       </div>
 
@@ -619,9 +619,9 @@
 
           <div class="card-head">
             <div>
-              <div class="card-title">＋ New Product</div>
+              <div class="card-title">＋ New Product / Service</div>
               <div class="card-sub">
-                Adds one new product to the BIG BROTHER Master Product list.
+                Adds one sellable Product or Service to the BIG BROTHER master item list.
               </div>
             </div>
           </div>
@@ -633,7 +633,16 @@
               <div class="form-grid four">
 
                 <div class="field">
-                  <label>Product Code *</label>
+                  <label>Item Type *</label>
+                  <select id="aItemType" onchange="syncAddItemTypeUi()">
+                    <option value="PRODUCT">Product — Stock Item</option>
+                    <option value="SERVICE">Service — No Stock</option>
+                  </select>
+                  <small id="aItemTypeHelp">Product participates in Purchase, Stock, Batch and COGS.</small>
+                </div>
+
+                <div class="field">
+                  <label>Item Code *</label>
                   <input
                     id="aCode"
                     required
@@ -645,7 +654,7 @@
                 </div>
 
                 <div class="field">
-                  <label>Product Name *</label>
+                  <label>Item Name *</label>
                   <input id="aName" required>
                 </div>
 
@@ -653,7 +662,7 @@
                   <label>Category</label>
                   <input
                     id="aCategory"
-                    placeholder="Example: Fresh Milk"
+                    placeholder="Example: Fresh Milk / Delivery Service"
                   >
                 </div>
 
@@ -662,7 +671,7 @@
                   <input
                     id="aUnit"
                     required
-                    placeholder="Bottle / Box / Pack"
+                    placeholder="Bottle / Box / Service / Trip / Hour"
                   >
                 </div>
 
@@ -679,7 +688,7 @@
                 </div>
 
                 <div class="field">
-                  <label>Product Barcode</label>
+                  <label>Barcode (Product only)</label>
                   <input id="aBarcode">
                 </div>
 
@@ -693,12 +702,9 @@
 
               </div>
 
-              <div class="info blue" style="margin-top:12px">
-                When the new product is saved, BIG BROTHER automatically
-                creates its column in <strong>Customer Prices</strong>,
-                copies the existing format, and gives every customer this
-                product's Default Price USD. The product also becomes available
-                in <strong>Clients Editor</strong> for supplier linking.
+              <div class="info blue" style="margin-top:12px" id="itemTypeInfo">
+                <strong>Product:</strong> sold through Invoice Generator and participates in Purchase, Warehouse/Batch Stock and COGS.
+                <br><strong>Service:</strong> sold through Invoice Generator and Customer Prices, but never appears in Purchase or Stock and never deducts inventory.
               </div>
 
               <div class="actions">
@@ -711,7 +717,7 @@
                 </button>
 
                 <button class="btn green" id="addSaveBtn">
-                  Save New Product
+                  Save New Item
                 </button>
               </div>
 
@@ -729,7 +735,7 @@
         <div class="summary">
 
           <div class="summary-card">
-            <span>TOTAL PRODUCTS</span>
+            <span>TOTAL ITEMS</span>
             <strong id="totalProducts">0</strong>
           </div>
 
@@ -754,9 +760,9 @@
 
           <div class="card-head">
             <div>
-              <div class="card-title">Product Details and Price</div>
+              <div class="card-title">Product & Service Details and Price</div>
               <div class="card-sub">
-                Manage Master Product information and inspect all connected selling and purchase prices.
+                Manage Products and Services, selling prices, and stock/supplier relationships.
               </div>
             </div>
 
@@ -774,7 +780,7 @@
             <input
               class="search search-main"
               id="productSearch"
-              placeholder="Search Product Code, Name, Category or Barcode…"
+              placeholder="Search Item Code, Name, Type, Category or Barcode…"
               oninput="renderProductTable()"
             >
 
@@ -810,8 +816,9 @@
             <table>
               <thead>
                 <tr>
-                  <th>Product Code</th>
-                  <th>Product Name</th>
+                  <th>Item Code</th>
+                  <th>Item Name</th>
+                  <th>Type</th>
                   <th>Category</th>
                   <th>Unit</th>
                   <th>Default Price USD</th>
@@ -853,21 +860,30 @@
           <div class="section">
 
             <div class="section-title">
-              <span>Master Product Information</span>
+              <span>Master Item Information</span>
             </div>
 
             <div class="form-grid four">
 
               <div class="field">
-                <label>Product Code</label>
+                <label>Item Code</label>
                 <input id="dCode" disabled>
                 <small>
-                  Permanent BIG BROTHER product key.
+                  Permanent BIG BROTHER item key.
                 </small>
               </div>
 
               <div class="field">
-                <label>Product Name *</label>
+                <label>Item Type *</label>
+                <select id="dItemType" onchange="syncDetailItemTypeUi()">
+                  <option value="PRODUCT">Product — Stock Item</option>
+                  <option value="SERVICE">Service — No Stock</option>
+                </select>
+                <small id="dItemTypeHelp"></small>
+              </div>
+
+              <div class="field">
+                <label>Item Name *</label>
                 <input id="dName">
               </div>
 
@@ -895,7 +911,7 @@
               </div>
 
               <div class="field">
-                <label>Product Barcode</label>
+                <label>Barcode (Product only)</label>
                 <input id="dBarcode">
               </div>
 
@@ -1065,12 +1081,12 @@ const $=id=>document.getElementById(id);
 
 const pageInfo={
   add:[
-    "Add Product",
-    "Create a new Master Product."
+    "Add Product / Service",
+    "Create a sellable stock Product or non-stock Service."
   ],
   details:[
-    "Product Details and Price",
-    "View complete Product details, Customer Selling Prices and Client Purchase Prices."
+    "Product & Service Details and Price",
+    "View item details, Customer Selling Prices and Product supplier prices."
   ]
 };
 
@@ -1762,6 +1778,8 @@ function startSmartSync(){
 
 function addPayload(){
   return{
+    itemType:
+      $("aItemType").value,
     productCode:
       $("aCode").value.trim(),
     productName:
@@ -1792,7 +1810,7 @@ $("addForm").addEventListener(
       !data.unit
     ){
       return toast(
-        "Product Code, Product Name and Unit are required.",
+        "Item Code, Item Name and Unit are required.",
         true
       );
     }
@@ -1819,9 +1837,9 @@ $("addForm").addEventListener(
       );
 
       toast(
-        "Product "+
+        (result.product.itemType==="SERVICE"?"Service ":"Product ")+
         result.product.code+
-        " created successfully. Customer Prices column was synchronized."
+        " created successfully. Customer Prices were synchronized."
       );
 
       resetAddForm();
@@ -1857,6 +1875,34 @@ function resetAddForm(){
   $("addForm").reset();
   $("aPrice").value="0";
   $("aActive").value="true";
+  $("aItemType").value="PRODUCT";
+  syncAddItemTypeUi();
+}
+
+function syncAddItemTypeUi(){
+  const service=$("aItemType")?.value==="SERVICE";
+  if($("aItemTypeHelp")){
+    $("aItemTypeHelp").textContent=service
+      ?"Service is sales-only: no Purchase, Warehouse, Batch, COGS, or Box conversion."
+      :"Product participates in Purchase, Warehouse/Batch Stock and COGS.";
+  }
+  if($("aBarcode")){
+    $("aBarcode").disabled=service;
+    if(service)$("aBarcode").value="";
+  }
+}
+
+function syncDetailItemTypeUi(){
+  const service=$("dItemType")?.value==="SERVICE";
+  if($("dItemTypeHelp")){
+    $("dItemTypeHelp").textContent=service
+      ?"Service is sales-only and never changes stock."
+      :"Product is inventory-tracked and can be purchased/sold.";
+  }
+  if($("dBarcode")){
+    $("dBarcode").disabled=service;
+    if(service)$("dBarcode").value="";
+  }
 }
 
 function filteredProducts(){
@@ -1876,6 +1922,7 @@ function filteredProducts(){
     const haystack=[
       item.code,
       item.name,
+      item.itemType,
       item.category,
       item.unit,
       item.barcode,
@@ -1908,6 +1955,9 @@ function renderProductTable(){
         "<td>"+
         esc(item.name)+
         "</td>"+
+        "<td><span class='badge "+(String(item.itemType||"PRODUCT").toUpperCase()==="SERVICE"?"purple":"blue")+"'>"+
+        esc(String(item.itemType||"PRODUCT").toUpperCase())+
+        "</span></td>"+
         "<td>"+
         esc(item.category||"—")+
         "</td>"+
@@ -1932,7 +1982,7 @@ function renderProductTable(){
         "')\">Manage</button></td>"+
         "</tr>"
       ).join("")
-      :"<tr><td colspan='8' class='empty'>No products found.</td></tr>";
+      :"<tr><td colspan='9' class='empty'>No items found.</td></tr>";
 }
 
 function clearFilters(){
@@ -1952,9 +2002,10 @@ function fillProductDetail(product){
     .classList.remove("hidden");
 
   $("detailTitle").textContent=
-    product.name||"Product Details";
+    product.name||"Item Details";
 
   $("detailCodeBadge").textContent=
+    (String(product.itemType||"PRODUCT").toUpperCase()==="SERVICE"?"SERVICE · ":"PRODUCT · ")+
     product.code;
 
   $("dCode").value=
@@ -1962,6 +2013,9 @@ function fillProductDetail(product){
 
   $("dName").value=
     product.name||"";
+
+  $("dItemType").value=
+    String(product.itemType||"PRODUCT").toUpperCase();
 
   $("dCategory").value=
     product.category||"";
@@ -1979,6 +2033,8 @@ function fillProductDetail(product){
 
   $("dActive").value=
     String(Boolean(product.active));
+
+  syncDetailItemTypeUi();
 }
 
 function applyDetail(result){
@@ -2116,6 +2172,8 @@ function detailPayload(){
       $("dCode").value,
     productCode:
       $("dCode").value,
+    itemType:
+      $("dItemType").value,
     productName:
       $("dName").value.trim(),
     category:
@@ -2139,7 +2197,7 @@ async function saveProductDetail(){
     !data.unit
   ){
     return toast(
-      "Product Name and Unit are required.",
+      "Item Name and Unit are required.",
       true
     );
   }
@@ -2264,12 +2322,16 @@ function renderCustomerPrices(){
 }
 
 function renderClientPrices(){
+  const isService=String(state.selected?.itemType||"PRODUCT").toUpperCase()==="SERVICE";
   $("clientPriceCount").textContent=
-    state.clientPrices.length+
-    " Clients";
+    isService
+      ?"Not used for Service"
+      :(state.clientPrices.length+" Clients");
 
   $("clientPriceBody").innerHTML=
-    state.clientPrices.length
+    isService
+      ?"<tr><td colspan='8' class='empty'>Service items are sales-only and do not use suppliers or Purchase prices.</td></tr>"
+      :state.clientPrices.length
       ?state.clientPrices.map(item=>
         "<tr>"+
         "<td><strong>"+
@@ -2366,6 +2428,7 @@ window.addEventListener(
 );
 
 // FAST START
+syncAddItemTypeUi();
 applyWorkspaceMode();
 openPage(resolveInitialPage());
 loadMainCache();
