@@ -15,7 +15,7 @@
       Object.keys(localStorage).filter(k=>k.startsWith('BB_PRODUCTS_EDITOR_DETAIL_V1_')).forEach(k=>localStorage.removeItem(k));
     }catch(_){}
 
-    const response=await fetch('legacy-google-v1.html?v=20260930-service1',{cache:'no-store'});
+    const response=await fetch('legacy-google-v1.html?v=20260930-service2',{cache:'no-store'});
     if(!response.ok)throw new Error('Could not load Products Editor source.');
     let html=await response.text();
 
@@ -42,7 +42,7 @@ ${marker}`;
     const bodyClose=html.toLowerCase().lastIndexOf('</body>');
     if(bodyClose<0)throw new Error('Products Editor source is missing </body>.');
     const dual='<scr'+'ipt src="dual-currency-pricing.js?v=20260910-2"></scr'+'ipt>\n';
-    const sellingUnits='<scr'+'ipt src="product-selling-units-v1.js?v=20260930-service1"></scr'+'ipt>\n';
+    const sellingUnits='<scr'+'ipt src="product-selling-units-v1.js?v=20260930-service2"></scr'+'ipt>\n';
     html=html.slice(0,bodyClose)+dual+sellingUnits+html.slice(bodyClose);
 
     document.open();
