@@ -99,6 +99,18 @@ function ensureSection(){
   return section;
 }
 
+function selectedIsService(){
+  const type=clean($('dItemType')?.value || state?.selected?.itemType || '');
+  return type.toUpperCase()==='SERVICE';
+}
+
+function syncServiceVisibility(){
+  const section=$('bbSellingUnitSection');
+  if(!section)return;
+  const service=selectedIsService();
+  section.style.display=service?'none':'';
+}
+
 function fallbackProduct(){
   return {
     productCode:clean(data?.product?.productCode||$('dCode')?.value),
@@ -155,6 +167,8 @@ function fmt(v){
 
 function render(){
   ensureSection();
+  syncServiceVisibility();
+  if(selectedIsService())return;
   populateTarget();
 
   const units=Array.isArray(data?.units)?data.units:[];
@@ -211,6 +225,15 @@ function editUnit(id){
 async function load(productCode,force=false){
   const code=clean(productCode||$('dCode')?.value);
   ensureSection();
+  syncServiceVisibility();
+
+  if(selectedIsService()){
+    data=null;
+    loadedCode=code;
+    loadingCode='';
+    return true;
+  }
+
   populateTarget();
 
   if(!code){
@@ -265,6 +288,7 @@ async function load(productCode,force=false){
 async function saveUnit(){
   const code=clean($('dCode')?.value);
   if(!code)return notify('Please open a Product first.',true);
+  if(selectedIsService())return notify('Service items do not use stock selling-unit conversion.',true);
 
   if(!data || clean(data?.product?.productCode)!==code){
     const ready=await load(code,true);
@@ -349,9 +373,11 @@ function install(){
   function watchSelectedProduct(){
     const card=$('productDetailCard');
     const code=clean($('dCode')?.value);
-    populateTarget();
+    syncServiceVisibility();
+    if(!selectedIsService())populateTarget();
 
     if(!card || card.classList.contains('hidden') || !code)return;
+    if(selectedIsService()){loadedCode=code;loadingCode='';return;}
     if(code!==loadedCode && code!==loadingCode)load(code,true);
   }
 
@@ -363,5 +389,5 @@ function install(){
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});
 else install();
 
-window.BBProductSellingUnitsEditor={load,render,resetForm};
+window.BBProductSellingUnitsEditor={load,render,resetForm,syncServiceVisibility};
 })();
