@@ -852,7 +852,7 @@
               class="btn ghost"
               onclick="closeProductDetail()"
             >
-              ← Back to Products
+              ← Back to Items
             </button>
           </div>
 
@@ -1820,7 +1820,7 @@ $("addForm").addEventListener(
     button.disabled=true;
     button.textContent="Saving…";
 
-    setConnection("Saving product…");
+    setConnection("Saving item…");
 
     try{
       const result=await apiPost(
@@ -1859,7 +1859,7 @@ $("addForm").addEventListener(
 
     }finally{
       button.disabled=false;
-      button.textContent="Save New Product";
+      button.textContent="Save New Item";
 
       if(state.liveLoaded){
         setConnection(
@@ -2103,7 +2103,7 @@ async function openProductDetail(productCode){
 
     showLoading(
       true,
-      "Loading complete Product details and prices…"
+      "Loading complete item details and prices…"
     );
   }
 
@@ -2226,7 +2226,7 @@ async function saveProductDetail(){
     const migration=
       result.defaultPriceMigration||{};
 
-    let message="Product information updated.";
+    let message=(result.product.itemType==="SERVICE"?"Service":"Product")+" information updated.";
 
     if(
       Number(migration.updatedCustomers||0)>0
@@ -2260,7 +2260,7 @@ async function saveProductDetail(){
   }finally{
     button.disabled=false;
     button.textContent=
-      "Save Product Information";
+      "Save Item Information";
   }
 }
 
